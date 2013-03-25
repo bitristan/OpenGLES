@@ -1,0 +1,399 @@
+/*
+   Copyright 2012 Harri Smatt
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
+
+precision mediump float;
+
+uniform sampler2D sTexture;
+
+uniform float uBrightness;
+uniform float uContrast;
+uniform float uSaturation;
+uniform float uCornerRadius;
+
+varying vec2 vTextureCoord;
+
+vec3 brightness(vec3 color, float brightness) {
+	float scaled = brightness / 2.0;
+	if (scaled < 0.0) {
+		return color * (1.0 + scaled);
+	} else {
+		return color + ((1.0 - color) * scaled);
+	}
+}
+
+vec3 contrast(vec3 color, float contrast) {
+	const float PI = 3.14159265;
+	return min(vec3(1.0), ((color - 0.5) * (tan((contrast + 1.0) * PI / 4.0) ) + 0.5));
+}
+
+vec3 overlay(vec3 overlayComponent, vec3 underlayComponent, float alpha) {
+	vec3 underlay = underlayComponent * alpha;
+	return underlay * (underlay + (2.0 * overlayComponent * (1.0 - underlay)));
+}
+
+vec3 multiplyWithAlpha(vec3 overlayComponent, float alpha, vec3 underlayComponent) {
+	return underlayComponent * overlayComponent * alpha;
+}
+
+vec3 screenPixelComponent(vec3 maskPixelComponent, float alpha, vec3 imagePixelComponent) {
+	return 1.0 - (1.0 - (maskPixelComponent * alpha)) * (1.0 - imagePixelComponent);
+}
+
+vec3 rgbToHsv(vec3 color) {
+	vec3 hsv;
+	
+	float mmin = min(color.r, min(color.g, color.b));
+	float mmax = max(color.r, max(color.g, color.b));
+	float delta = mmax - mmin;
+	
+	hsv.z = mmax;
+	hsv.y = delta / mmax;
+
+	if (color.r == mmax) {
+		hsv.x = (color.g - color.b) / delta;
+	} else if (color.g == mmax) {
+		hsv.x = 2.0 + (color.b - color.r) / delta;
+	} else {
+		hsv.x = 4.0 + (color.r - color.g) / delta;
+	}
+	
+	hsv.x *= 0.166667;
+	if (hsv.x < 0.0) {
+		hsv.x += 1.0;
+	}
+	
+	return hsv;
+}
+
+vec3 hsvToRgb(vec3 hsv) {
+	if (hsv.y == 0.0) {
+		return vec3(hsv.z);
+	} else {
+		float i;
+		float aa, bb, cc, f;
+
+		float h = hsv.x;
+		float s = hsv.y;
+		float b = hsv.z;
+
+		if (h == 1.0) {
+			h = 0.0;
+		}
+
+		h *= 6.0;
+		i = floor(h);
+		f = h - i;
+		aa = b * (1.0 - s);
+		bb = b * (1.0 - (s * f));
+		cc = b * (1.0 - (s * (1.0 - f)));
+		
+		if (i == 0.0) return vec3(b, cc, aa);
+		if (i == 1.0) return vec3(bb, b, aa);
+		if (i == 2.0) return vec3(aa, b, cc);
+		if (i == 3.0) return vec3(aa, bb, b);
+		if (i == 4.0) return vec3(cc, aa, b);
+		if (i == 5.0) return vec3(b, aa, bb);
+	}
+}
+
+vec3 saturation(vec3 color, float sat) {
+	const float lumaR = 0.212671;
+	const float lumaG = 0.715160;
+	const float lumaB = 0.072169;
+	
+	float v = sat + 1.0;
+	float i = 1.0 - v;
+	float r = i * lumaR;
+	float g = i * lumaG;
+	float b = i * lumaB;
+	
+	mat3 mat = mat3(r + v, r, r, g, g + v, g, b, b, b + v);
+	
+	return mat * color;
+}
+/*
+vec3 alpha_compose(vec3 top, vec3 bottom, float opacity) {
+	int r = int((top.x - bottom.x) * opacity + bottom.x);
+	int g = int((top.y - bottom.y) * opacity + bottom.y);
+	int b = int((top.z - bottom.z) * opacity + bottom.z);
+	
+	return vec3(r, g, b);
+}
+*/
+vec3 bilateral(sampler2D texture, vec2 textureCoord) {
+	int radius = 4;
+	float ds = 10.0;
+	float rs = 20.0;
+	float pi = 3.14159;
+	int i, j;
+	vec3 weight = vec3(0.0);
+	vec3 weight_sum = vec3(0.0);
+	vec3 sum = vec3(0.0);
+	vec3 rgb, rgb2;
+	float dss = -1.0 / (2.0 * ds * ds);
+	float rss = -1.0 / (2.0 * rs * rs);
+	float dist;
+	rgb = texture2D(texture, textureCoord).rgb;
+	for (i = -radius; i <= radius; i++) {
+		for (j = -radius; j <= radius; j++) {
+			rgb2 = texture2D(texture, textureCoord.st + vec2(i, j)).rgb;
+			dist = float(i * i) + float(j * j);
+			weight = exp(dss * dist) * exp(rss * (rgb - rgb2) * (rgb - rgb2));
+			weight_sum += weight;
+			sum += (weight * rgb2);
+		}
+	}
+
+	return sum / weight;
+}
+
+vec3 pro_filter(vec3 color, float len) {
+	float la1 = 0.0000001242;
+	float lb1 = -0.00002726;
+	float lc1 = 0.001664;
+	float ld1 = 0.3025;
+	float le1 = -0.3201;
+
+	float la2 = 0.0000001585;
+	float lb2 = -0.00009574;
+	float lc2 = 0.01628;
+	float ld2 = 0.4404;
+	float le2 = 11.364;
+
+	float ra3 = 0.000008214;
+	float rb3 = -0.005948;
+	float rc3 = 2.177;
+	float rd3 = -46.11;
+	float ga3 = -0.000005161;
+	float gb3 = 0.001879;
+	float gc3 = 0.8686;
+	float gd3 = 2.588;
+	float ba3 = -0.0000007206;
+	float bb3 = 0.001104;
+	float bc3 = 0.6422;
+	float bd3 = 27.4;
+	float la3 = -0.000001389;
+	float lb3 = 0.001411;
+	float lc3 = 0.6832;
+	float ld3 = 13.56;
+
+	float sec1 = 1.5;
+	float sec2 = 1.5;
+	float sec3 = 2.0;
+	float sec4 = 2.0;
+	float sec5 = 3.0;
+	float dis1 = 0.25;
+	float dis2 = 0.25;
+	float dis3 = 0.20;
+	float dis4 = 0.20;
+	float dis5 = 0.10;
+
+	float sec21 = 1.0;
+	float sec22 = 1.0;
+	float sec23 = 2.0;
+	float sec24 = 3.0;
+	float sec25 = 3.0;
+	float dis21 = 0.30;
+	float dis22 = 0.30;
+	float dis23 = 0.15;
+	float dis24 = 0.15;
+	float dis25 = 0.10;
+	
+	float tr, tg, tb;
+	float r, g, b;
+	r = color.x;
+	g = color.y;
+	b = color.z;
+/*	
+	tr = clamp(la1 * r * r * r * r + lb1 * r * r * r + lc1 * r * r + ld1 * r + le1, 0.0, 255.0);
+	tg = clamp(la1 * g * g * g * g + lb1 * g * g * g + lc1 * g * g + ld1 * g + le1, 0.0, 255.0);
+	tb = clamp(la1 * b * b * b * b + lb1 * b * b * b + lc1 * b * b + ld1 * b + le1, 0.0, 255.0);
+
+	if (len > (dis1 + dis2 + dis3 + dis4)) {
+		r = r + (tr - r) * (sec1 + sec2 + sec3 + sec4) / 10.0
+				+ ((tr - r) * sec5 / 10.0 / dis5)
+						* (len - dis1 - dis2 - dis3
+								- dis4);
+		g = g + (tg - g) * (sec1 + sec2 + sec3 + sec4) / 10.0
+				+ ((tg - g) * sec5 / 10.0 / dis5)
+						* (len - dis1 - dis2 - dis3
+								- dis4);
+		b = b + (tb - b) * (sec1 + sec2 + sec3 + sec4) / 10.0
+				+ ((tb - b) * sec5 / 10.0 / dis5)
+						* (len - dis1 - dis2 - dis3
+								- dis4);
+	} else if (len > (dis1 + dis2 + dis3)) {
+		r = r + (tr - r) * (sec1 + sec2 + sec3) / 10.0
+				+ ((tr - r) * sec4 / 10.0 / dis4)
+						* (len - dis1 - dis2 - dis3);
+		g = g + (tg - g) * (sec1 + sec2 + sec3) / 10.0
+				+ ((tg - g) * sec4 / 10.0 / dis4)
+						* (len - dis1 - dis2 - dis3);
+		b = b + (tb - b) * (sec1 + sec2 + sec3) / 10.0
+				+ ((tb - b) * sec4 / 10.0 / dis4)
+						* (len - dis1 - dis2 - dis3);
+	} else if (len > (dis1 + dis2)) {
+		r = r + (tr - r) * (sec1 + sec2) / 10.0
+				+ ((tr - r) * sec3 / 10.0 / dis3)
+						* (len - dis1 - dis2);
+		g = g + (tg - g) * (sec1 + sec2) / 10.0
+				+ ((tg - g) * sec3 / 10.0 / dis3)
+						* (len - dis1 - dis2);
+		b = b + (tb - b) * (sec1 + sec2) / 10.0
+				+ ((tb - b) * sec3 / 10.0 / dis3)
+						* (len - dis1 - dis2);
+	} else if (len > dis1) {
+		r = r + (tr - r) * sec1 / 10.0
+				+ ((tr - r) * sec2 / 10.0 / dis2)
+						* (len - dis1);
+		g = g + (tg - g) * sec1 / 10.0
+				+ ((tg - g) * sec2 / 10.0 / dis2)
+						* (len - dis1);
+		b = b + (tb - b) * sec1 / 10.0
+				+ ((tb - b) * sec2 / 10.0 / dis2)
+						* (len - dis1);
+	} else if (len > 0.0) {
+		r = r
+				+ ((tr - r) * sec1 / 10.0 / dis1) * len;
+		g = g
+				+ ((tg - g) * sec1 / 10.0 / dis1) * len;
+		b = b
+				+ ((tb - b) * sec1 / 10.0 / dis1) * len;
+	}
+	
+	r = clamp(r, 0.0, 255.0);
+	g = clamp(g, 0.0, 255.0);
+	b = clamp(b, 0.0, 255.0);
+*/
+	tr = clamp(la2 * r * r * r * r + lb2 * r * r * r + lc2 * r * r + ld2 * r + le2, 0.0, 255.0);
+	tg = clamp(la2 * g * g * g * g + lb2 * g * g * g + lc2 * g * g + ld2 * g + le2, 0.0, 255.0);
+	tb = clamp(la2 * b * b * b * b + lb2 * b * b * b + lc2 * b * b + ld2 * b + le2, 0.0, 255.0);
+
+	if (len > (dis21 + dis22 + dis23 + dis24)) {
+		r = tr + (r - tr) * (sec21 + sec22 + sec23 + sec24) / 10.0
+				+ ((r - tr) * sec25 / 10.0 / dis25) * (len - dis21 - dis22 - dis23 - dis24);
+		g = tg + (g - tg) * (sec21 + sec22 + sec23 + sec24) / 10.0
+				+ ((g - tg) * sec25 / 10.0 / dis25) * (len - dis21 - dis22 - dis23 - dis24);
+		b = tb + (b - tb) * (sec21 + sec22 + sec23 + sec24) / 10.0
+				+ ((b - tb) * sec25 / 10.0 / dis25) * (len - dis21 - dis22 - dis23 - dis24);
+	} else if (len > (dis21 + dis22 + dis23)) {
+		r = tr + (r - tr) * (sec21 + sec22 + sec23) / 10.0
+				+ ((r - tr) * sec24 / 10.0 / dis24)	* (len - dis21 - dis22 - dis23);
+		g = tg + (g - tg) * (sec21 + sec22 + sec23) / 10.0
+				+ ((g - tg) * sec24 / 10.0 / dis24) * (len - dis21 - dis22 - dis23);
+		b = tb + (b - tb) * (sec21 + sec22 + sec23) / 10.0
+				+ ((b - tb) * sec24 / 10.0 / dis24)	* (len - dis21 - dis22 - dis23);
+	} else if (len > (dis21 + dis22)) {
+		r = tr + (r - tr) * (sec21 + sec22) / 10.0
+				+ ((r - tr) * sec23 / 10.0 / dis23)	* (len - dis21 - dis22);
+		g = tg + (g - tg) * (sec21 + sec22) / 10.0
+				+ ((g - tg) * sec23 / 10.0 / dis23)	* (len - dis21 - dis22);
+		b = tb + (b - tb) * (sec21 + sec22) / 10.0
+				+ ((b - tb) * sec23 / 10.0 / dis23)	* (len - dis21 - dis22);
+	} else if (len > dis21) {
+		r = tr + (r - tr) * sec21 / 10.0
+				+ ((r - tr) * sec22 / 10.0 / dis22)	* (len - dis21);
+		g = tg + (g - tg) * sec21 / 10.0
+				+ ((g - tg) * sec22 / 10.0) / dis22	* (len - dis21);
+		b = tb + (b - tb) * sec21 / 10.0
+				+ ((b - tb) * sec22 / 10.0) / dis22	* (len - dis21);
+	} else if (len > 0.0) {
+		r = tr + ((r - tr) * sec21 / 10.0 / dis21)	* len;
+		g = tg + ((g - tg) * sec21 / 10.0 / dis21)	* len;
+		b = tb + ((b - tb) * sec21 / 10.0 / dis21)	* len;
+	}
+
+	r = clamp(r, 0.0, 255.0);
+	g = clamp(g, 0.0, 255.0);
+	b = clamp(b, 0.0, 255.0);
+/*	
+	r = clamp(ra3 * r * r * r + rb3 * r * r + rc3 * r + rd3, 0.0, 255.0);
+	g = clamp(ga3 * g * g * g + gb3 * g * g + gc3 * g + gd3, 0.0, 255.0);
+	b = clamp(ba3 * b * b * b + bb3 * b * b + bc3 * b + bd3, 0.0, 255.0);
+	
+	r = clamp(la3 * r * r * r + lb3 * r * r + lc3 * r + ld3, 0.0, 255.0);
+	g = clamp(la3 * g * g * g + lb3 * g * g + lc3 * g + ld3, 0.0, 255.0);
+	b = clamp(la3 * b * b * b + lb3 * b * b + lc3 * b + ld3, 0.0, 255.0);
+	
+	float opacity;
+	if (len < 0.3) {
+		opacity = 0.05 + 0.05 / 0.3 * len;
+	} else if (len < 0.56) {
+		opacity = 0.10 + 0.15 / 0.26 * (len - 0.3);
+	} else if (len < 0.80) {
+		opacity = 0.25 + 0.34 / 0.24 * (len - 0.56);
+	} else {
+		opacity = 0.59 + 0.41 / 0.20 * (len - 0.8);
+	}
+
+	if (len < 0.55) {
+		tr = 144.0;
+		tg = 145.0;
+		tb = 128.0;
+	} else if (len < 0.93) {
+		tr = 144.0 - 33.0 / 0.38 * (len - 0.55);
+		tg = 145.0 - 49.0 / 0.38 * (len - 0.55);
+		tb = 130.0 - 34.0 / 0.38 * (len - 0.55);
+	} else {
+		tr = 111.0;
+		tg = 96.0;
+		tb = 94.0;
+	}
+
+	if (r < tr) {
+		tr = r;
+	}
+	if (g < tg) {
+		tg = g;
+	}
+	if (b < tb) {
+		tb = b;
+	}
+	
+	r += ((tr - r) * opacity);
+	g += ((tg - g) * opacity);
+	b += ((tb - b) * opacity);
+	
+	r = clamp(r, 0.0, 255.0);
+	g = clamp(g, 0.0, 255.0);
+	b = clamp(b, 0.0, 255.0);
+*/	
+	return vec3(r, g, b);
+}
+
+____FUNCTION_FILTER____
+
+void main() {
+	vec3 color = texture2D(sTexture, vTextureCoord).rgb;
+	
+	// Calculate brightness, contrast and saturation.
+	color = brightness(color, uBrightness);
+	color = contrast(color, uContrast);
+	color = saturation(color, uSaturation);
+	
+	// Calculate darkened corners.
+	const float sqrt2 = 1.414213562373;
+	float len = distance(vTextureCoord, vec2(0.5)) * sqrt2;
+	len = smoothstep(1.0 - uCornerRadius, 1.0, len);
+	color *= mix(0.5, 1.0, 1.0 - len);
+	
+/*	vec3 color = texture2D(sTexture, vTextureCoord).rgb;
+	const float sqrt2 = 1.414213562373;
+	float len = distance(vTextureCoord, vec2(0.5)) * sqrt2;
+	color = pro_filter(color, len);
+*/	
+	gl_FragColor = vec4(color, 1.0);
+}
