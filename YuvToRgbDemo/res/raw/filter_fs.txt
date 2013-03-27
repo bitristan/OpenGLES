@@ -1,0 +1,17 @@
+precision mediump float;
+
+varying vec2 textureCoordinate;
+
+uniform sampler2D inputImageTexture;
+uniform sampler2D uvTexture;
+
+void main() {
+	vec4 y = vec4((texture2D(inputImageTexture, textureCoordinate).r - 16./255.) * 1.164);  
+  	vec4 u = vec4(texture2D(uvTexture, textureCoordinate).a - 128./255.);  
+  	vec4 v = vec4(texture2D(uvTexture, textureCoordinate).r - 128./255.);  
+  	y += v * vec4(1.596, -0.813, 0, 0);
+  	y += u * vec4(0, -0.392, 2.017, 0);  
+  	y.a = 1.0;
+  	
+  	gl_FragColor = y;      
+}
