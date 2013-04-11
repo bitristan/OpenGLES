@@ -1,11 +1,13 @@
 obj/local/armeabi/objs/nativeegl/jniapi.o: jni/jniapi.cpp jni/jniapi.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/jni.h \
- jni/renderer.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/pthread.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/time.h \
+ jni/rrimagelib.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdlib.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs_elf.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/time.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/string.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/malloc.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/alloca.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/strings.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/types.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdint.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/_types.h \
@@ -18,22 +20,19 @@ obj/local/armeabi/objs/nativeegl/jniapi.o: jni/jniapi.cpp jni/jniapi.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/types.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/kernel.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/sysmacros.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/time.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/siginfo.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/siginfo.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/signal.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/memory.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdio.h \
+ jni/libjpeg/jpeglib.h jni/libjpeg/jconfig.h jni/libjpeg/jmorecfg.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/setjmp.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/setjmp.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/android/log.h \
+ /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/math.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/limits.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/limits.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/limits.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/internal_types.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/limits.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/syslimits.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/string.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/malloc.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/signal.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/signal.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/sigcontext.h \
- /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sched.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/GLES2/gl2.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/GLES2/gl2platform.h \
  /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/KHR/khrplatform.h \
@@ -46,17 +45,21 @@ jni/jniapi.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/jni.h:
 
-jni/renderer.h:
+jni/rrimagelib.h:
 
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/pthread.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/time.h:
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdlib.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/cdefs_elf.h:
 
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/time.h:
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/string.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/malloc.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/alloca.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/strings.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/types.h:
 
@@ -82,13 +85,23 @@ jni/renderer.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/sysmacros.h:
 
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/linux/time.h:
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/memory.h:
 
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/siginfo.h:
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/stdio.h:
 
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/siginfo.h:
+jni/libjpeg/jpeglib.h:
 
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/signal.h:
+jni/libjpeg/jconfig.h:
+
+jni/libjpeg/jmorecfg.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/setjmp.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/setjmp.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/android/log.h:
+
+/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/math.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/limits.h:
 
@@ -101,18 +114,6 @@ jni/renderer.h:
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/machine/limits.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sys/syslimits.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/string.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/malloc.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/signal.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm-generic/signal.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/asm/sigcontext.h:
-
-/Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/sched.h:
 
 /Users/tristan/Tools/android-ndk-r8/platforms/android-14/arch-arm/usr/include/GLES2/gl2.h:
 
