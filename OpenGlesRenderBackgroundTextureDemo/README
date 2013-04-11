@@ -1,0 +1,14 @@
+OpenGL后台渲染，不与View关联，并将渲染结果保存成jpeg文件
+
+此例使用shader渲染Texture的Demo，
+
+重点：
+1. 使用eglCreateContext函数时，一定要指定EGL_CONTEXT_CLIENT_VERSION为2，否则shader无法正常使用，会抛出"called unimplement opengl es api"异常;
+2. 使用glReadPixels函数时，必须使用GL_RGBA和GL_UNSIGNED_BYTE，不能使用GL_RGB;
+3. eglCreatePbufferSurface函数的使用，创建不与窗口关联的后台渲染缓冲区;
+4. glReadPixels得到图像是上下镜像翻转的，要得到正确的图像，需要对数据做一次垂直镜像翻转;
+
+其他均与OpenGL ES Java实现相同
+
+运行此工程：
+成功运行之后会在/sdcard目录下生成test.jpg，查看此文件是否渲染结果
