@@ -1,0 +1,548 @@
+#include "jniapi.h"
+#include <time.h>
+#include "rrimagelib.h"
+
+#include <GLES2/gl2.h>
+#include <EGL/egl.h>
+
+const char pro_fs[] = "precision mediump float;\
+		varying vec2 textureCoordinate;\
+		uniform sampler2D inputImageTexture;\
+		void main()\
+		{\
+		float la1 = 525.15;\
+		float lb1 = -452.00;\
+		float lc1 = 108.20;\
+		float ld1 = 77.13;\
+		float le1 = -0.3201;\
+		float la2 = 670.2;\
+		float lb2 = -1587.5;\
+		float lc2 = 1058.6;\
+		float ld2 = 112.3;\
+		float le2 = 11.365;\
+		float ra3 = 136.20;\
+		float rb3 = -386.78;\
+		float rc3 = 555.135;\
+		float rd3 = -46.11;\
+		float ga3 = -85.57;\
+		float gb3 = 122.20;\
+		float gc3 = 221.50;\
+		float gd3 = 2.588;\
+		float ba3 = -11.94;\
+		float bb3 = 71.80;\
+		float bc3 = 163.761;\
+		float bd3 = 27.4;\
+		float la3 = -23.03;\
+		float lb3 = 91.75;\
+		float lc3 = 174.21;\
+		float ld3 = 13.56;\
+		float sec1 = 1.5;\
+		float sec2 = 1.5;\
+		float sec3 = 2.0;\
+		float sec4 = 2.0;\
+		float sec5 = 3.0;\
+		float dis1 = 0.25;\
+		float dis2 = 0.25;\
+		float dis3 = 0.20;\
+		float dis4 = 0.20;\
+		float dis5 = 0.10;\
+		float sec21 = 1.0;\
+		float sec22 = 1.0;\
+		float sec23 = 2.0;\
+		float sec24 = 3.0;\
+		float sec25 = 3.0;\
+		float dis21 = 0.30;\
+		float dis22 = 0.30;\
+		float dis23 = 0.15;\
+		float dis24 = 0.15;\
+		float dis25 = 0.10;\
+		vec3 color = texture2D(inputImageTexture, textureCoordinate).xyz;\
+		vec3 ttcolor, tmp;\
+		float distance_coeff = distance(textureCoordinate, vec2(0.5, 0.5)) * sqrt(2.0);\
+		float r, g, b;\
+		float tr, tg, tb;\
+		float opacity;\
+		ttcolor = (la1 * color * color * color * color + lb1 * color * color * color + lc1 * color * color + ld1 * color + le1) / 255.0;\
+		if (distance_coeff > (dis1 + dis2 + dis3 + dis4)) {\
+		color = color + (ttcolor - color) * (sec1 + sec2 + sec3 + sec4) / 10.0\
+		+ ((ttcolor - color) * sec5 / 10.0 / dis5) * (distance_coeff - dis1 - dis2 - dis3 - dis4);\
+		} else if (distance_coeff > (dis1 + dis2 + dis3)) {\
+		color = color + (ttcolor - color) * (sec1 + sec2 + sec3) / 10.0\
+		+ ((ttcolor - color) * sec4 / 10.0 / dis4) * (distance_coeff - dis1 - dis2 - dis3);\
+		} else if (distance_coeff > (dis1 + dis2)) {\
+		color = color + (ttcolor - color) * (sec1 + sec2) / 10.0\
+		+ ((ttcolor - color) * sec3 / 10.0 / dis3) * (distance_coeff - dis1 - dis2);\
+		} else if (distance_coeff > dis1) {\
+		color = color + (ttcolor - color) * sec1 / 10.0\
+		+ ((ttcolor - color) * sec2 / 10.0 / dis2) * (distance_coeff - dis1);\
+		} else {\
+		color = color + ((ttcolor - color) * sec1 / 10.0 / dis1) * distance_coeff;\
+		}\
+		color = clamp(color, vec3(0.0), vec3(1.0));\
+		ttcolor = (la2 * color * color * color * color  + lb2 * color * color * color + lc2 * color * color  + ld2 * color + le2) / 255.0;\
+		if (distance_coeff > (dis21 + dis22 + dis23 + dis24)) {\
+		color = ttcolor + (color - ttcolor) * (sec21 + sec22 + sec23 + sec24) / 10.0\
+		+ ((color - ttcolor) * sec25 / 10.0 / dis25) * (distance_coeff - dis21 - dis22 - dis23 - dis24);\
+		} else if (distance_coeff > (dis21 + dis22 + dis23)) {\
+		color = ttcolor + (color - ttcolor) * (sec21 + sec22 + sec23) / 10.0				+ ((color - ttcolor) * sec24 / 10.0 / dis24) * (distance_coeff - dis21 - dis22 - dis23);\
+		} else if (distance_coeff > (dis21 + dis22)) {\
+		color = ttcolor + (color - ttcolor) * (sec21 + sec22) / 10.0\
+		+ ((color - ttcolor) * sec23 / 10.0 / dis23) * (distance_coeff - dis21 - dis22);\
+		} else if (distance_coeff > dis21) {\
+		color = ttcolor + (color - ttcolor) * sec21 / 10.0\
+		+ ((color - ttcolor) * sec22 / 10.0) / dis22 * (distance_coeff - dis21);\
+		} else {\
+		color = ttcolor + ((color - ttcolor) * sec21 / 10.0 / dis21) * distance_coeff;\
+		}\
+		color = clamp(color, vec3(0.0), vec3(1.0));\
+		r = color.x;\
+		g = color.y;\
+		b = color.z;\
+		r = (ra3 * r * r * r + rb3 * r * r + rc3 * r + rd3) / 255.0;\
+		g = (ga3 * g * g * g + gb3 * g * g + gc3 * g + gd3) / 255.0;\
+		b = (ba3 * b * b * b + bb3 * b * b + bc3 * b + bd3) / 255.0;\
+		color = vec3(r, g, b);\
+		color = clamp(color, vec3(0.0), vec3(1.0));\
+		color = la3 * color * color * color + lb3 * color * color + lc3 * color + ld3;\
+		color = clamp(color, vec3(0.0), vec3(255.0));\
+		r = color.r;\
+		g = color.g;\
+		b = color.b;\
+		if (distance_coeff < 0.3) {\
+		opacity = 0.05 + 0.05 / 0.3 * distance_coeff;\
+		} else if (distance_coeff < 0.56) {\
+		opacity = 0.10 + 0.15 / 0.26 * (distance_coeff - 0.3);\
+		} else if (distance_coeff < 0.80) {\
+		opacity = 0.25 + 0.34 / 0.24 * (distance_coeff - 0.56);\
+		} else {\
+		opacity = 0.59 + 0.41 / 0.20 * (distance_coeff - 0.8);\
+		}\
+		if (distance_coeff < 0.55) {\
+		tr = float(0x98);\
+		tg = float(0x99);\
+		tb = float(0x82);\
+		} else if (distance_coeff < 0.93) {\
+		tr = float(0x98) - (float(0x98) - float(0x6e)) / 0.38 * (distance_coeff - 0.55);\
+		tg = float(0x99) - (float(0x99) - float(0x5f)) / 0.38 * (distance_coeff - 0.55);\
+		tb = float(0x82) - (float(0x82) - float(0x5d)) / 0.38 * (distance_coeff - 0.55);\
+		} else {\
+		tr = float(0x6e);\
+		tg = float(0x5f);\
+		tb = float(0x5d);\
+		}\
+		tr = (r < tr) ? r : tr;\
+		tg = (g < tg) ? g : tg;\
+		tb = (b < tb) ? b : tb;\
+		r += (tr - r) * opacity;\
+		g += (tg - g) * opacity;\
+		b += (tb - b) * opacity;\
+		color = vec3(r, g, b) / 255.0;\
+		gl_FragColor = vec4(color, 1.0);\
+		}";
+
+GLuint loadShader(const char *shaderSrc, GLenum type) {
+	GLuint shader;
+	GLint compiled;
+
+	shader = glCreateShader(type);
+	if (shader == 0) {
+		return 0;
+	}
+
+	glShaderSource(shader, 1, &shaderSrc, NULL);
+	glCompileShader(shader);
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+	if (!compiled) {
+		GLint infoLen = 0;
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLen);
+		if (infoLen > 1) {
+			char* infoLog = (char *) malloc(sizeof(char) * infoLen);
+			glGetShaderInfoLog(shader, infoLen, NULL, infoLog);
+			LOGD("Error compiling shader:\n%s\n", infoLog);
+			free(infoLog);
+		}
+		glDeleteShader(shader);
+		return 0;
+	}
+
+	return shader;
+}
+
+JNIEXPORT void JNICALL Java_com_tristan_sun_nativeegl_demo_NativeEglExample_drawBackgroud
+(JNIEnv *env, jclass object, jint width, jint height) {
+	long start, end;
+
+	start = clock();
+	rrimage *path = read_jpeg("/sdcard/path.jpg");
+	LOGD("texture width = %d, texture height = %d", path->width, path->height);
+	end = clock();
+	LOGD("read file time is: %ld", (end - start));
+
+	start = clock();
+	const EGLint configAttribs[] = {EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_BLUE_SIZE,
+					8, EGL_GREEN_SIZE, 8, EGL_RED_SIZE, 8, const EGLint configAttribs[] = {EGL_SURFACE_TYPE, EGL_PBUFFER_BIT, EGL_BLUE_SIZE,
+													       8, EGL_GREEN_SIZE, 8, EGL_RED_SIZE, 8, EGL_RENDERABLE_TYPE, EGL_OPENGL_ES2_BIT, EGL_NONE};
+					const EGLint surfaceAttribs[] = {EGL_WIDTH, width, EGL_HEIGHT, height,
+									 EGL_NONE};
+					const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE};
+
+					EGLDisplay display;
+					EGLSurface surface;
+					EGLContext context;
+
+					EGLConfig config;
+					EGLint numConfigs;
+					EGLint format;
+
+					if ((display = eglGetDisplay(EGL_DEFAULT_DISPLAY)) == EGL_NO_DISPLAY) {
+					  LOGD("eglGetDisplay() returned error %d", eglGetError());
+					  return;
+					}
+					if (!eglInitialize(display, 0, 0)) {
+					  LOGD("eglInitialize() returned error %d", eglGetError());
+					  return;
+					}
+					if (!eglChooseConfig(display, configAttribs, &config, 1, &numConfigs)) {
+					  LOGD("eglChooseConfig() returned error %d", eglGetError());
+					  eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+					  eglDestroyContext(display, context);
+					  eglDestroySurface(display, surface);
+					  eglTerminate(display);
+
+					  display = EGL_NO_DISPLAY;
+					  surface = EGL_NO_SURFACE;
+					  context = EGL_NO_CONTEXT;
+					  return;
+					}
+
+					if (!eglGetConfigAttrib(display, config, EGL_NATIVE_VISUAL_ID, &format)) {
+					  LOGD("eglGetConfigAttrib() returned error %d", eglGetError());
+					  eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+					  eglDestroyContext(display, context);
+					  eglDestroySurface(display, surface);
+					  eglTerminate(display);
+
+					  display = EGL_NO_DISPLAY;
+					  surface = EGL_NO_SURFACE;
+					  context = EGL_NO_CONTEXT;
+					  return;
+					}
+
+					if (!(context = eglCreateContext(display, config, 0, contextAttribs))) {
+					  LOGD("eglCreateContext() returned error %d", eglGetError());
+					  eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+					  eglDestroyContext(display, context);
+					  eglDestroySurface(display, surface);
+					  eglTerminate(display);
+
+					  display = EGL_NO_DISPLAY;
+					  surface = EGL_NO_SURFACE;
+					  context = EGL_NO_CONTEXT;
+					  return;
+					}
+
+					if (!(surface = eglCreatePbufferSurface(display, config, surfaceAttribs))) {
+					  LOGD("eglCreatePbufferSurface() returned error %d", eglGetError());
+					  eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+					  eglDestroyContext(display, context);
+					  eglDestroySurface(display, surface);
+					  eglTerminate(display);
+
+					  display = EGL_NO_DISPLAY;
+					  surface = EGL_NO_SURFACE;
+					  context = EGL_NO_CONTEXT;
+					  return;
+					}
+
+					if (!eglMakeCurrent(display, surface, surface, context)) {
+					  LOGD("eglMakeCurrent() returned error %d", eglGetError());
+					  eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+					  eglDestroyContext(display, context);
+					  eglDestroySurface(display, surface);
+					  eglTerminate(display);
+
+					  display = EGL_NO_DISPLAY;
+					  surface = EGL_NO_SURFACE;
+					  context = EGL_NO_CONTEXT;
+					  return;
+					}
+
+					glClearColor(0, 1, 1, 1);
+					glViewport(0, 0, width, height);
+
+					const char vShaderStr[] =
+					"attribute vec4 vPosition; attribute vec4 inputTextureCoordinate; varying vec2 textureCoordinate; \
+void main() { gl_Position = vPosition; textureCoordinate = inputTextureCoordinate.xy; }";
+					const char fShaderStr[] =
+					"precision mediump float; varying highp vec2 textureCoordinate; uniform sampler2D inputImageTexture; \
+void main() { gl_FragColor = texture2D(inputImageTexture, textureCoordinate); }";
+
+					GLuint textureId;
+					glGenTextures(1, &textureId);
+					glBindTexture(GL_TEXTURE_2D, textureId);
+					glTexParameterf(GL_TEXTURE_2D,
+							GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameterf(GL_TEXTURE_2D,
+							GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+							GL_CLAMP_TO_EDGE);
+					glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+							GL_CLAMP_TO_EDGE);
+
+					rrimage *path = read_jpeg("/sdcard/path.jpg");
+					if (path) {
+					  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, path->width, path->height, 0, GL_RGB, GL_UNSIGNED_BYTE, path->pixels);
+					}
+
+					GLuint vertexShader;
+					GLuint fragmentShader;
+					GLuint programObject;
+					GLint linked;
+					vertexShader = loadShader(vShaderStr, GL_VERTEX_SHADER);
+					fragmentShader = loadShader(fShaderStr, GL_FRAGMENT_SHADER);
+
+					programObject = glCreateProgram();
+					if (programObject == 0) {
+					  return;
+					}
+					glAttachShader(programObject, vertexShader);
+					glAttachShader(programObject, fragmentShader);
+					glLinkProgram(programObject);
+					glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+					if (!linked) {
+					  GLint infoLen = 0;
+					  glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+					  if (infoLen > 1) {
+					    char* infoLog = (char *) malloc(sizeof(char) * infoLen);
+					    glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+					    LOGD("Error linking program:\n%s\n", infoLog);
+					    free(infoLog);
+					  }
+					  glDeleteProgram(programObject);
+					  return;
+					}
+
+					int positionHandler = glGetAttribLocation(programObject, "vPosition");
+					int coordinateHandler = glGetAttribLocation(programObject, "inputTextureCoordinate");
+					int textureHandler = glGetUniformLocation(programObject, "inputImageTexture");
+
+					glClear (GL_COLOR_BUFFER_BIT);
+					glUseProgram(programObject);
+
+					GLfloat vVertices[] = {-1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 0.0f,
+							       1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f};
+					//glReadPixels‘¶Á‘³ö‘Ïñ‘ËØ‘ÊÇ‘ÉÏ‘ÏÂ‘·­‘×ª‘µÄ‘£¬‘ÓÚ‘ÊÇ‘Õâ‘Àï‘×ö‘Ò»‘¸ö‘ÉÏ‘ÏÂ‘¾µ‘Ïñ‘·­‘×ª‘£¬‘±Ü‘Ãâ‘¶Ô‘¶Á‘³ö‘Êý‘¾Ý‘ÔÙ‘´¦‘Àí
+					//GLfloat vCoordinates[] = {0.0f, 0.0f, 0.0f,
+					//1.0f, 1.0f, 0.0f, 1.0f, 1.0f,};
+					GLfloat vCoordinates[] = {0.0f, 1.0f, 0.0f,
+								  0.0f, 1.0f, 1.0f, 1.0f, 0.0f,};
+
+					glVertexAttribPointer(positionHandler, 3, GL_FLOAT,
+							      GL_FALSE, 0, vVertices);
+					glEnableVertexAttribArray(positionHandler);
+
+					glVertexAttribPointer(coordinateHandler, 2, GL_FLOAT,
+							      GL_FALSE, 0, vCoordinates);
+					glEnableVertexAttribta->pixels = pixels;
+					strip_alpha(data);
+
+					LOGD("write result = %d\n", write_jpeg("/sdcard/test.jpg", data));
+					free_rrimage(data);
+EGL_NONE};
+	const EGLint surfaceAttribs[] = {EGL_WIDTH, width, EGL_HEIGHT, height,
+		EGL_NONE};
+	const EGLint contextAttribs[] = {EGL_CONTEXT_CLIENT_VERSION, 2, EGL_NONE, EGL_NONE};
+
+	EGLDisplay display;
+	EGLSurface surface;
+	EGLContext context;
+
+	EGLConfig config;
+	EGLint numConfigs;
+	EGLint format;
+
+	if ((display = eglGetDisplay(EGL_DEFAULT_DISPLAY)) == EGL_NO_DISPLAY) {
+		LOGD("eglGetDisplay() returned error %d", eglGetError());
+		return;
+	}
+	if (!eglInitialize(display, 0, 0)) {
+		LOGD("eglInitialize() returned error %d", eglGetError());
+		return;
+	}
+	if (!eglChooseConfig(display, configAttribs, &config, 1, &numConfigs)) {
+		LOGD("eglChooseConfig() returned error %d", eglGetError());
+		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		eglDestroyContext(display, context);
+		eglDestroySurface(display, surface);
+		eglTerminate(display);
+
+		display = EGL_NO_DISPLAY;
+		surface = EGL_NO_SURFACE;
+		context = EGL_NO_CONTEXT;
+		return;
+	}
+
+	if (!(context = eglCreateContext(display, config, 0, contextAttribs))) {
+		LOGD("eglCreateContext() returned error %d", eglGetError());
+		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		eglDestroyContext(display, context);
+		eglDestroySurface(display, surface);
+		eglTerminate(display);
+
+		display = EGL_NO_DISPLAY;
+		surface = EGL_NO_SURFACE;
+		context = EGL_NO_CONTEXT;
+		return;
+	}
+
+	if (!(surface = eglCreatePbufferSurface(display, config, surfaceAttribs))) {
+		LOGD("eglCreatePbufferSurface() returned error %d", eglGetError());
+		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		eglDestroyContext(display, context);
+		eglDestroySurface(display, surface);
+		eglTerminate(display);
+
+		display = EGL_NO_DISPLAY;
+		surface = EGL_NO_SURFACE;
+		context = EGL_NO_CONTEXT;
+		return;
+	}
+
+	if (!eglMakeCurrent(display, surface, surface, context)) {
+		LOGD("eglMakeCurrent() returned error %d", eglGetError());
+		eglMakeCurrent(display, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
+		eglDestroyContext(display, context);
+		eglDestroySurface(display, surface);
+		eglTerminate(display);
+
+		display = EGL_NO_DISPLAY;
+		surface = EGL_NO_SURFACE;
+		context = EGL_NO_CONTEXT;
+		return;
+	}
+
+	end = clock();
+	LOGD("egl init time is: %ld", (end - start));
+
+	start = clock();
+	GLint textureMaxSize;
+	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &textureMaxSize);
+	LOGD("texture max size = %d", textureMaxSize);
+
+	glClearColor(0, 1, 1, 1);
+	glViewport(0, 0, width, height);
+
+	const char vShaderStr[] =
+	"attribute vec4 vPosition; attribute vec4 inputTextureCoordinate; varying vec2 textureCoordinate; \
+	void main() { gl_Position = vPosition; textureCoordinate = inputTextureCoordinate.xy; }";
+	const char fShaderStr[] =
+	"precision mediump float; varying highp vec2 textureCoordinate; uniform sampler2D inputImageTexture; \
+	void main() { gl_FragColor = texture2D(inputImageTexture, textureCoordinate); }";
+
+	GLuint textureId;
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexParameterf(GL_TEXTURE_2D,
+			GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D,
+			GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+			GL_CLAMP_TO_EDGE);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+			GL_CLAMP_TO_EDGE);
+
+	if (path) {
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, path->width, path->height, 0, GL_RGB, GL_UNSIGNED_BYTE, path->pixels);
+	}
+
+	GLuint vertexShader;
+	GLuint fragmentShader;
+	GLuint programObject;
+	GLint linked;
+	vertexShader = loadShader(vShaderStr, GL_VERTEX_SHADER);
+	fragmentShader = loadShader(pro_fs, GL_FRAGMENT_SHADER);
+
+	programObject = glCreateProgram();
+	if (programObject == 0) {
+		return;
+	}
+	glAttachShader(programObject, vertexShader);
+	glAttachShader(programObject, fragmentShader);
+	glLinkProgram(programObject);
+	glGetProgramiv(programObject, GL_LINK_STATUS, &linked);
+	if (!linked) {
+		GLint infoLen = 0;
+		glGetProgramiv(programObject, GL_INFO_LOG_LENGTH, &infoLen);
+		if (infoLen > 1) {
+			char* infoLog = (char *) malloc(sizeof(char) * infoLen);
+			glGetProgramInfoLog(programObject, infoLen, NULL, infoLog);
+			LOGD("Error linking program:\n%s\n", infoLog);
+			free(infoLog);
+		}
+		glDeleteProgram(programObject);
+		return;
+	}
+
+	int positionHandler = glGetAttribLocation(programObject, "vPosition");
+	int coordinateHandler = glGetAttribLocation(programObject, "inputTextureCoordinate");
+	int textureHandler = glGetUniformLocation(programObject, "inputImageTexture");
+
+	glClear (GL_COLOR_BUFFER_BIT);
+	glUseProgram(programObject);
+
+	GLfloat vVertices[] = {-1.0f, 1.0f, 0.0f, -1.0f, -1.0f, 0.0f,
+		1.0f, 1.0f, 0.0f, 1.0f, -1.0f, 0.0f};
+	//glReadPixels‘¶Á‘³ö‘Ïñ‘ËØ‘ÊÇ‘ÉÏ‘ÏÂ‘·­‘×ª‘µÄ‘£¬‘ÓÚ‘ÊÇ‘Õâ‘Àï‘×ö‘Ò»‘¸ö‘ÉÏ‘ÏÂ‘¾µ‘Ïñ‘·­‘×ª‘£¬‘±Ü‘Ãâ‘¶Ô‘¶Á‘³ö‘Êý‘¾Ý‘ÔÙ‘´¦‘Àí
+	//GLfloat vCoordinates[] = {0.0f, 0.0f, 0.0f,
+	//1.0f, 1.0f, 0.0f, 1.0f, 1.0f,};
+	GLfloat vCoordinates[] = {0.0f, 1.0f, 0.0f,
+		0.0f, 1.0f, 1.0f, 1.0f, 0.0f,};
+
+	glVertexAttribPointer(positionHandler, 3, GL_FLOAT,
+			GL_FALSE, 0, vVertices);
+	glEnableVertexAttribArray(positionHandler);
+
+	glVertexAttribPointer(coordinateHandler, 2, GL_FLOAT,
+			GL_FALSE, 0, vCoordinates);
+	glEnableVertexAttribArray(coordinateHandler);
+
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glUniform1i(textureHandler, 0);
+
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisableVertexAttribArray(positionHandler);
+	glDisableVertexAttribArray(coordinateHandler);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	end = clock();
+	LOGD("opengl draw time is %d", (end - start));
+
+	start = clock();
+	unsigned char *pixels = (unsigned char *) malloc(width * height * 4);
+	glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+	end = clock();
+	LOGD("read pixels time is: %ld", (end - start));
+
+	rrimage *data = init_rrimage();
+	data->width = width;
+	data->height = height;
+	data->channels = 4;
+	data->pixels = pixels;
+
+	start = clock();
+	strip_alpha(data);
+	end = clock();
+	LOGD("strip alpha time is: %ld", (end - start));
+
+	start = clock();
+	LOGD("write result = %d\n", write_jpeg("/sdcard/test.jpg", data));
+	free_rrimage(data);
+
+	end = clock();
+	LOGD("write time is: %ld", (end - start));
+
+	return;
+}
+
