@@ -1,8 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">CameraDemo</string>
+    <string name="app_name">SurfaceTextureDemo</string>
+    <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-    <string name="menu_settings">Settings</string>
-    <string name="title_activity_main">MainActivity</string>
+    
+    <string name="next_camera">Next Camera</string>
 
 </resources>
